@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { getAll, update } from './BooksAPI';
 import BookShelf from './BookShelf';
 import { Link } from 'react-router-dom';
 import PropTypes from "prop-types";
@@ -7,48 +6,12 @@ import PropTypes from "prop-types";
 
 
 export default class BookShelfList extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      allBooks: []
-    };
+
+
+  updateBook = (book, shelf) => {
+    this.props.updateBook(book, shelf);
   }
 
-
-
-  componentDidMount() {
-    this.getAllBooks();
-  }
-
-  getAllBooks = async () => {
-    await getAll().then(books => this.setState({
-      allBooks: books
-    }));
-  }
-
-  updateBook = async (book, shelf) => {
-    await update(book, shelf);
-    this.updateBookState(book, shelf);
-  }
-  updateBookState = (book, shelf) => {
-    var index = this.state.allBooks.findIndex(x => x.id === book.id);
-    let { allBooks } = this.state;
-    if (index === -1) {
-      allBooks.push(book);
-      this.setState({
-        allBooks: allBooks
-      });
-    } else {
-
-      this.setState({
-        allBooks: [
-          ...this.state.allBooks.slice(0, index),
-          Object.assign({}, this.state.allBooks[index], book),
-          ...this.state.allBooks.slice(index + 1)
-        ]
-      });
-    }
-  }
 
   render() {
     return (
@@ -65,8 +28,8 @@ export default class BookShelfList extends Component {
                 <div key={index}>
                   <BookShelf
                     shelf={shelf}
-                    bookShelf={this.state.allBooks}
-                    updateBook={this.updateBook}
+                    bookShelf={this.props.myBooks}
+                    updateBook={this.props.updateBook}
                   ></BookShelf>
                 </div>
               )

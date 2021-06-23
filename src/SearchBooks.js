@@ -11,7 +11,6 @@ export default class SearchBooks extends Component {
     query: '',
     books: null,
     displayBooks: false,
-    myBooks: []
   }
 
 
@@ -26,7 +25,7 @@ export default class SearchBooks extends Component {
       query: query
     });
   };
-  componentDidMount() {
+  /*componentDidMount() {
     this.getAllBooks();
   }
 
@@ -34,7 +33,7 @@ export default class SearchBooks extends Component {
     await getAll().then(books => this.setState({
       myBooks: books
     }));
-  }
+  }*/
 
   searchBooks = async (query) => {
     if (query.trim() !== '') {
@@ -42,7 +41,8 @@ export default class SearchBooks extends Component {
       const res = await search(`${query}`);
       if (!res.hasOwnProperty('error')) {
         res.forEach(book => {
-          const myBook = this.state.myBooks.filter(b => b.id === book.id);
+          console.log(`this.props.myBooks`, this.props.myBooks)
+          const myBook = this.props.myBooks.filter(b => b.id === book.id);
           if (myBook.length > 0) {
             book.shelf = myBook[0].shelf;
           }
@@ -67,30 +67,33 @@ export default class SearchBooks extends Component {
       displayBooks: displayBooks,
     });
   }
+  updateBook = (book, shelf) => {
+    this.props.updateBook(book, shelf);
+  }
 
 
-  updateBook = async (book, shelf) => {
-    await update(book, shelf);
-    this.updateBookState(book, shelf);
-  }
-  updateBookState = (book, shelf) => {
-    var index = this.state.myBooks.findIndex(x => x.id === book.id);
-    let { query, books, displayBooks, myBooks } = this.state;
-    if (index === -1) {
-      myBooks.push(book);
-      this.setState({
-        myBooks: myBooks
-      });
-    } else {
-      this.setState({
-        myBooks: [
-          ...this.state.myBooks.slice(0, index),
-          Object.assign({}, this.state.myBooks[index], book),
-          ...this.state.myBooks.slice(index + 1)
-        ]
-      });
-    }
-  }
+  /* updateBook = async (book, shelf) => {
+     await update(book, shelf);
+     this.updateBookState(book, shelf);
+   }
+   updateBookState = (book, shelf) => {
+     var index = this.state.myBooks.findIndex(x => x.id === book.id);
+     let { query, books, displayBooks, myBooks } = this.state;
+     if (index === -1) {
+       myBooks.push(book);
+       this.setState({
+         myBooks: myBooks
+       });
+     } else {
+       this.setState({
+         myBooks: [
+           ...this.state.myBooks.slice(0, index),
+           Object.assign({}, this.state.myBooks[index], book),
+           ...this.state.myBooks.slice(index + 1)
+         ]
+       });
+     }
+   }*/
 
   render() {
     return (
