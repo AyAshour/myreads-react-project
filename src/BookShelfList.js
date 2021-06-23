@@ -35,10 +35,17 @@ export default class BookShelfList extends Component {
     let { allBooks } = this.state;
     if (index === -1) {
       allBooks.push(book);
+      this.setState({
+        allBooks: allBooks
+      });
     } else {
 
       this.setState({
-        allBooks: allBooks,
+        allBooks: [
+          ...this.state.allBooks.slice(0, index),
+          Object.assign({}, this.state.allBooks[index], book),
+          ...this.state.allBooks.slice(index + 1)
+        ]
       });
     }
   }

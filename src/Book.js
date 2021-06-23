@@ -16,12 +16,17 @@ export default class Book extends Component {
         const newBook = this.state.book;
         newBook.shelf = event.target.value;
         this.props.updateBook(this.state.book, event.target.value);
-
+        console.log(`newBook.shelf`, newBook.shelf)
         this.setState({
             book: newBook,
             shelf: event.target.value
         })
 
+    }
+    checkThumbnail = () => {
+        const image = this.props.book.imageLinks;
+        return image === undefined ? "http://books.google.com/books/content?id=73kNFV4sDx8C&printsec=frontcover&img=1&zoom=5&edge=curl&source=gbs_api"
+            : image.smallThumbnail
     }
 
     render() {
@@ -29,7 +34,7 @@ export default class Book extends Component {
             <div>
                 <div className="book">
                     <div className="book-top">
-                        <div className="book-cover" style={{ width: 128, height: 193, backgroundImage: `url(${this.props.bookImage})` }}></div>
+                        <div className="book-cover" style={{ width: 128, height: 193, backgroundImage: `url(${this.checkThumbnail()})` }}></div>
                         <div className="book-shelf-changer">
                             <select
                                 className='custom-select'

@@ -23,7 +23,6 @@ export default class BookList extends Component {
                 <Book
                   book={book}
                   shelf={book.shelf}
-                  bookImage={book.imageLinks.smallThumbnail}
                   updateBook={this.updateBook}
                 ></Book>
               </li>

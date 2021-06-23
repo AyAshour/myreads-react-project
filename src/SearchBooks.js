@@ -1,51 +1,95 @@
 import React, { Component } from "react";
 import Book from './Book';
-import { search, update } from "./BooksAPI";
+import { getAll, search, update } from "./BooksAPI";
 import { Link } from 'react-router-dom';
 
 
-
-
 export default class SearchBooks extends Component {
+
+
   state = {
     query: '',
     books: null,
-    displayBooks: false
+    displayBooks: false,
+    myBooks: []
   }
-  updateQuery = async (query) => {
+
+
+  updateQueryAndSearch = async (query) => {
+    this.updateQuery(query);
+    await this.searchBooks();
+  }
+
+  updateQuery = (query) => {
+    console.log(`query`, query);
     this.setState({
-      query: query
+      query: query.trim()
     });
   };
+  componentDidMount() {
+    this.getAllBooks();
+  }
+
+  getAllBooks = async () => {
+    await getAll().then(books => this.setState({
+      myBooks: books
+    }));
+  }
+
   searchBooks = async () => {
+    if (this.state.query !== '') {
 
-    const res = await search(`${this.state.query}`);
-    if (!res.hasOwnProperty('error')) {
-      res.forEach(book => {
-        book.shelf = 'none'
-      });
-      this.updateState(res, true);
+      const res = await search(`${this.state.query}`);
+      if (!res.hasOwnProperty('error')) {
+        res.forEach(book => {
+          const myBook = this.state.myBooks.filter(b => b.id === book.id);
+          if (myBook.length > 0) {
+            book.shelf = myBook[0].shelf;
+          }
+          else {
+            book.shelf = 'none'
+          }
+        });
+        await this.updateState(res, true);
+      }
+      else {
+        await this.updateState(null, false);
+      }
+    } else {
+      await this.updateState(null, false);
     }
-    else
-      this.updateState(null, false);
 
   }
-  disableDisplay = () => {
-    this.setState({
-      displayBooks: false,
-      books: null
-    });
 
-  }
-  updateState = (res, displayBooks) => {
+  updateState = async (res, displayBooks) => {
     this.setState({
       books: res,
-      displayBooks: true
+      displayBooks: displayBooks,
     });
   }
+
 
   updateBook = async (book, shelf) => {
     await update(book, shelf);
+    this.updateBookState(book, shelf);
+  }
+  updateBookState = (book, shelf) => {
+    var index = this.state.myBooks.findIndex(x => x.id === book.id);
+    let { query, books, displayBooks, myBooks } = this.state;
+    if (index === -1) {
+      myBooks.push(book);
+      this.setState({
+        myBooks: myBooks
+      });
+    } else {
+      this.setState({
+        myBooks: [
+          ...this.state.myBooks.slice(0, index),
+          Object.assign({}, this.state.myBooks[index], book),
+          ...this.state.myBooks.slice(index + 1)
+        ]
+      });
+    }
   }
 
   render() {
@@ -64,26 +108,15 @@ export default class SearchBooks extends Component {
               type="text"
               placeholder="Search by title or author"
               value={this.state.query}
-              onChange={event => this.updateQuery(event.target.value)}
+              onChange={event => this.updateQueryAndSearch(event.target.value)}
             />
-
-            <button
-              onClick={async (event) => await this.searchBooks()}
-            >
-              search books
-            </button>
-            <button
-              onClick={(event) => this.disableDisplay()}
-            >
-              clear results
-            </button>
 
           </div>
         </div>
         <div className="search-books-results">
           <ol className="books-grid" >
             <div>
-              {this.state.displayBooks && this.state.books !== null ?
+              {this.state.displayBooks && this.state.query !== '' && this.state.books !== null ?
                 <ol className="books-grid">
                   {
                     this.state.books.map((book, index) => (
@@ -91,7 +124,6 @@ export default class SearchBooks extends Component {
                         <Book
                           book={book}
                           shelf={book.shelf}
-                          bookImage={book.imageLinks.smallThumbnail}
                           updateBook={this.updateBook}
                         ></Book>
                       </li>
