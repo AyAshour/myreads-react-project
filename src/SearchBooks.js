@@ -1,7 +1,7 @@
 import React, { Component } from "react";
+import { Link } from 'react-router-dom';
 import Book from './Book';
 import { getAll, search, update } from "./BooksAPI";
-import { Link } from 'react-router-dom';
 
 
 export default class SearchBooks extends Component {
@@ -17,13 +17,13 @@ export default class SearchBooks extends Component {
 
   updateQueryAndSearch = async (query) => {
     this.updateQuery(query);
-    await this.searchBooks();
+    await this.searchBooks(query);
   }
 
   updateQuery = (query) => {
     console.log(`query`, query);
     this.setState({
-      query: query.trim()
+      query: query
     });
   };
   componentDidMount() {
@@ -36,10 +36,10 @@ export default class SearchBooks extends Component {
     }));
   }
 
-  searchBooks = async () => {
-    if (this.state.query !== '') {
+  searchBooks = async (query) => {
+    if (query.trim() !== '') {
 
-      const res = await search(`${this.state.query}`);
+      const res = await search(`${query}`);
       if (!res.hasOwnProperty('error')) {
         res.forEach(book => {
           const myBook = this.state.myBooks.filter(b => b.id === book.id);
